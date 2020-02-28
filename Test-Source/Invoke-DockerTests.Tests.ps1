@@ -27,7 +27,7 @@ Describe 'Run docker tests using Google Structure' {
         }
 
         It 'can accept a relative path as test report directory' {
-            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             $result = Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath -TestReportDir './'
@@ -44,7 +44,7 @@ Describe 'Run docker tests using Google Structure' {
         }
 
         It 'can accept a non-existant path as test report directory, and can create the path to store test reports' {
-            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             $result = Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath -TestReportDir (Join-Path (New-RandomFolder) (New-Guid))
@@ -61,7 +61,7 @@ Describe 'Run docker tests using Google Structure' {
         }
 
         It 'can execute 1 succesful test' {
-            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             $result = Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath
@@ -119,7 +119,7 @@ Describe 'Run docker tests using Google Structure' {
         }
 
         It 'throws an exception if required on test failures' {
-            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             $theCode = { Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath -TreatTestFailuresAsExceptions -TestReportDir (New-RandomFolder) }
@@ -146,8 +146,7 @@ Describe 'Run docker tests using Google Structure' {
     Context 'Pipeline execution' {
 
         BeforeAll {
-            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'testshell.yml'
-            $structureExistConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType 'fileexistence.yaml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsPassDir $Global:DockerOsType
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             $pipedInput = {
@@ -174,7 +173,7 @@ Describe 'Run docker tests using Google Structure' {
 
         It 'outputs result if Quiet is disabled' {
             $tempFile = New-TemporaryFile
-            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath -Quiet:$false 6> $tempFile
@@ -186,7 +185,7 @@ Describe 'Run docker tests using Google Structure' {
 
         It 'suppresses output if Quiet is enabled' {
             $tempFile = New-TemporaryFile
-            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'testshell.yml'
+            $structureCommandConfig = Join-Path $Global:StructureTestsFailDir $Global:DockerOsType 'single' 'testshell.yml'
             $structureCommandConfigPath = (Get-Item -Path $structureCommandConfig).Directory.FullName
 
             Invoke-DockerTests -ImageName $imageToTest -ConfigPath $structureCommandConfigPath -Quiet:$true 6> $tempFile

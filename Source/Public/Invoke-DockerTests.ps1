@@ -6,10 +6,6 @@ function Invoke-DockerTests {
         $ImageName,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [String[]]
-        $ConfigFiles = ((Get-ChildItem -Path . -Filter *.y*ml | Select-Object Name) | ForEach-Object { $_.Name }),
-
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [String]
         $ConfigPath = '.',
 
@@ -29,14 +25,10 @@ function Invoke-DockerTests {
     )
     $absoluteConfigPath = Format-AsAbsolutePath ($ConfigPath)
     if (Test-Path -Path $absoluteConfigPath -PathType Container) {
-        $foundConfigFiles = ((Get-ChildItem -Path $absoluteConfigPath -Filter *.y*ml | Select-Object Name) | ForEach-Object { $_.Name })
+        $foundConfigFiles = ((Get-ChildItem -Path $absoluteConfigPath -Filter *.y*ml | Select-Object FullName) | ForEach-Object { $_.FullName })
     }
     if ($null -eq $foundConfigFiles -or $foundConfigFiles.Length -eq 0) {
         throw [System.ArgumentException]::new('$ConfigPath does not contain any test configuration file.')
-    }
-
-    if ($null -eq $ConfigFiles -or $ConfigFiles.Length -eq 0) {
-        throw [System.ArgumentException]::new('$ConfigFiles must contain one more test configuration file paths.')
     }
 
     $here = Format-AsAbsolutePath (Get-Location)
@@ -59,7 +51,7 @@ function Invoke-DockerTests {
         " -v `"${dockerSocket}:${dockerSocket}`"" + `
         " 3shape/containerized-structure-test:latest test -i ${ImageName} --test-report ${report}/${TestReportName}"
 
-    $ConfigFiles.ForEach( {
+    $foundConfigFiles.ForEach( {
             $configFile = Convert-ToUnixPath (Resolve-Path -Path $_  -Relative)
             $configName = Remove-Prefix -Value $configFile -Prefix './'
             $structureCommand = -join ($structureCommand, " -c ${configs}/${configName}")
