@@ -9,6 +9,10 @@ function Invoke-DockerTests {
         [String[]]
         $ConfigFiles = ((Get-ChildItem -Path . -Filter *.y*ml | Select-Object Name) | ForEach-Object { $_.Name }),
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [String]
+        $ConfigPath = '.',
+
         [ValidateNotNullOrEmpty()]
         [String]
         $TestReportDir = '.',
@@ -23,6 +27,14 @@ function Invoke-DockerTests {
         [Switch]
         $Quiet = [System.Convert]::ToBoolean($env:DOCKER_CI_QUIET_MODE)
     )
+    $absoluteConfigPath = Format-AsAbsolutePath ($ConfigPath)
+    if (Test-Path -Path $absoluteConfigPath -PathType Container) {
+        $foundConfigFiles = ((Get-ChildItem -Path $absoluteConfigPath -Filter *.y*ml | Select-Object Name) | ForEach-Object { $_.Name })
+    }
+    if ($null -eq $foundConfigFiles -or $foundConfigFiles.Length -eq 0) {
+        throw [System.ArgumentException]::new('$ConfigPath does not contain any test configuration file.')
+    }
+
     if ($null -eq $ConfigFiles -or $ConfigFiles.Length -eq 0) {
         throw [System.ArgumentException]::new('$ConfigFiles must contain one more test configuration file paths.')
     }
